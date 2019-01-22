@@ -527,9 +527,9 @@ napi_value Yolo::DetectImage(napi_env env, napi_callback_info info)
   return nullptr;
  }
 
- if(argc<2)
+ if(argc<1)
  {
-  napi_throw_error(env, "01", "You have to pass the path to image and thresh value as parameters");
+  napi_throw_error(env, "01", "You have to pass the path to image as parameter");
   return nullptr;
  }
 
@@ -543,11 +543,14 @@ napi_value Yolo::DetectImage(napi_env env, napi_callback_info info)
  }
 
  double thresh=0.5;
- status=get_double_value(env, args, 1, &thresh);
- if(status != napi_ok)
+ if(argc>1)
  {
-  napi_throw_error(env, "04", "Cannot get thresh value");
-  return nullptr;
+  status=get_double_value(env, args, 1, &thresh);
+  if(status != napi_ok)
+  {
+   napi_throw_error(env, "04", "Cannot get thresh value");
+   return nullptr;
+  }
  }
 
  void *obj=nullptr;
