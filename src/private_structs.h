@@ -1,7 +1,7 @@
 #ifndef NODE_YOLO_PRIVATE_STRUCTS_H
 #define NODE_YOLO_PRIVATE_STRUCTS_H
 
-#include "libyolo.h"
+#include "include/yolo.h"
 
 #include <semaphore.h>
 

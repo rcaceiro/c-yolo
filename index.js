@@ -1,1 +1,0 @@
-module.exports = require(__dirname + '/build/Release/nodeyolo').Yolo;

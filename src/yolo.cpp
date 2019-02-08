@@ -1,4 +1,4 @@
-#include "libyolo.h"
+#include "include/yolo.h"
 #include "private_structs.h"
 
 #include <limits.h>
@@ -85,7 +85,7 @@ yolo_status parse_detections_video(yolo_object *yolo, detection *dets, yolo_dete
 {
  if((*yolo_detect) == nullptr)
  {
-  (*yolo_detect)=(yolo_detection_video *)calloc(1, sizeof(yolo_detection_video *));
+  (*yolo_detect)=(yolo_detection_video *)calloc(1, sizeof(yolo_detection_video*));
   if((*yolo_detect) == nullptr)
   {
    return yolo_cannot_alloc_yolo_detection;
