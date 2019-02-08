@@ -1,5 +1,6 @@
 # node-yolo
-This Node.js C++ addon allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
+**This project is in development, be carefull if you use it.**
+<br>This Node.js C++ addon allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
 <br>This addon came out from a computer engineering final project, [VAPi](https://github.com/freakstatic/vapi-server), guided by [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en) at [Institute Polytechnic of Leiria](https://www.ipleiria.pt/).
 <br>The version 1.x.x was developed by [Rúben Caceiro](https://github.com/rcaceiro) and [Ricardo Maltez](https://github.com/freakstatic) during the final project.
 <br>The version 2.x.x was sponsored by [Instituto de Telecomunicações](https://www.it.pt) developed by [Rúben Caceiro](https://github.com/rcaceiro) and guided by [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en). 
@@ -9,12 +10,10 @@ This Node.js C++ addon allow you to use a state-of-the-art, real-time object det
 * nVidia graphic card (Only if you want to use GPU acceleration):
 	* [CUDA](https://developer.nvidia.com/cuda-zone)
 	* [CuDNN](https://developer.nvidia.com/cudnn)
-* [Node.js](https://nodejs.org/en/) (tested on node.js>= 8)
-* [node-gyp](https://www.npmjs.com/package/node-gyp)
+* [CMake](https://nodejs.org/en/) (>=3.13)
 * [OpenCV](https://opencv.org)
 
 **Note 1**: Before any update please see the [changelog](https://github.com/rcaceiro/node-yolo/blob/master/CHANGELOG.md).<br>
-**Note 2**: The versions prior 2.0.0 of the module has the [ImageMagick](https://www.imagemagick.org) as a dependency, but with OpenCV we can archive the desired goal. And by this we remove one dependency of the project.
 ### Recommended* hardware requirements
 * Quad-core processor**
 * 10 GB to run node-yolo
@@ -25,7 +24,8 @@ This Node.js C++ addon allow you to use a state-of-the-art, real-time object det
 * At least 4GB of GPU memory***, if you want use GPU acceleration
 ## Installation
 ```sh
-npm i @vapi/node-yolo --save
+mkdir build && cd build && cmake ..
+make
 ```
 
 ## How To Use
