@@ -1,16 +1,17 @@
 # node-yolo
 **This project is in development, be carefull if you use it.**
-<br>This Node.js C++ addon allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
-<br>This addon came out from a computer engineering final project, [VAPi](https://github.com/freakstatic/vapi-server), guided by [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en) at [Institute Polytechnic of Leiria](https://www.ipleiria.pt/).
-<br>The version 1.x.x was developed by [Rúben Caceiro](https://github.com/rcaceiro) and [Ricardo Maltez](https://github.com/freakstatic) during the final project.
+<br>This C/C++ library allow you to use a state-of-the-art, real-time object detection system called [Yolo](https://pjreddie.com/darknet/yolo/).
+<br>This library came out through a split from the add-on [node-yolo](https://github.com/rcaceiro/node-yolo) and the library that handle the neural network calls.
+<br>The version 1.x.x was developed by [Rúben Caceiro](https://github.com/rcaceiro) and [Ricardo Maltez](https://github.com/freakstatic) during a computer engineering final project, [VAPi](https://github.com/freakstatic/vapi-server), guided by [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en) at [Institute Polytechnic of Leiria](https://www.ipleiria.pt/).
 <br>The version 2.x.x was sponsored by [Instituto de Telecomunicações](https://www.it.pt) developed by [Rúben Caceiro](https://github.com/rcaceiro) and guided by [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en). 
+<br>The version 3.x.x is currently developed by [Rúben Caceiro](https://github.com/rcaceiro) with some ideas stored from [Patrício Domingues](https://scholar.google.com/citations?user=LPwSQ2EAAAAJ&hl=en). 
 
 ### Pre-requirements
 * C/C++ Compiler (tested with gcc & g++)
-* nVidia graphic card (Only if you want to use GPU acceleration):
+* Nvidia graphic card (Only if you want to use GPU acceleration):
 	* [CUDA](https://developer.nvidia.com/cuda-zone)
 	* [CuDNN](https://developer.nvidia.com/cudnn)
-* [CMake](https://nodejs.org/en/) (>=3.13)
+* [CMake](https://cmake.org) (>=3.13)
 * [OpenCV](https://opencv.org)
 
 **Note 1**: Before any update please see the [changelog](https://github.com/rcaceiro/node-yolo/blob/master/CHANGELOG.md).<br>
@@ -26,11 +27,12 @@
 ```sh
 mkdir build && cd build && cmake ..
 make
+sudo make install
 ```
 
-## How To Use
+## How To Use (not updated)
 
-```javascript
+```c
 const Yolo = require('@vapi/node-yolo');
 const detector = new Yolo("darknet_configs", "cfg/coco.data", "cfg/yolov3.cfg", "yolov3.weights");
 detector.detectImage(path,threshold,frames_to_process)
@@ -76,7 +78,7 @@ You need to create two folder, cfg and data and put the files for each one. Like
 <br>**Note 2**: Our suggestion for faster detection use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3-tiny.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3-tiny.cfg) and [yolov3-tiny.weights](https://pjreddie.com/media/files/yolov3-tiny.weights).
 <br>**Note 3**: Our suggestion for best of two worlds use [coco.data](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.data), [coco.names](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/coco.names), [yolov3.cfg](https://raw.githubusercontent.com/pjreddie/darknet/master/cfg/yolov3.cfg) and [yolov3.weights](https://pjreddie.com/media/files/yolov3.weights).
 
-#### video detection object
+#### video detection object (not updated)
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `frame` | `long/int64` | number of the frame
@@ -84,20 +86,20 @@ You need to create two folder, cfg and data and put the files for each one. Like
 | `timeSpentForClassification` | `double` | time used to classifies one frame
 | `detections` | `array` | array of `detection` object, containing all detections
 
-#### image detection object
+#### image detection object(not updated)
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `timeSpentForClassification` | `double` | time used to classifies one image
 | `detections` | `array` | array of `detection` object, containing all detections
 
-#### detection object
+#### detection object(not updated)
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `className`   | `string` | name of the class of the object detected
 | `probability` | `double` | the probability that this className is correct
 | `box`         | `box` | object that contains box info of the object
 
-#### box object
+#### box object(not updated)
 | **Field** | **Type** | **Description**
 |:----------|:---------|:-----------------------------------------------------
 | `x`       | `double` | x coordinate in pixels of the picture
