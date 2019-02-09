@@ -4,6 +4,18 @@
 - **y** represent, new backwards compatible functionality are introduced
 - **x** represent, any backwards incompatible changes are introduced, and/or a big bundle of bug fixes and new functionalities are introduced.
 
+## [v3.0.0](https://github.com/rcaceiro/c-yolo/tree/v3.0.0) (2019)
+[Full Changelog](https://github.com/rcaceiro/c-yolo/compare/previous_3.x.x...v3.0.0)
+
+**Fixed bugs:**
+
+**New Features**:
+- Create a new C++ API
+
+**Implemented enhancements:**
+- Split from [node-yolo](https://github.com/rcaceiro/node-yolo) add-on.
+- Improve the C API
+
 ## [v2.1.3](https://github.com/rcaceiro/node-yolo/tree/v2.1.3) (24-12-2018)
 [Full Changelog](https://github.com/rcaceiro/node-yolo/compare/v2.1.1...v2.1.3)
 
