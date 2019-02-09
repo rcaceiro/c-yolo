@@ -30,10 +30,7 @@ typedef enum
  yolo_cfgfile_is_not_readable,
  yolo_weight_file_is_not_readable,
  yolo_names_file_is_not_exists,
- yolo_names_file_is_not_readable,
- yolo_image_file_is_not_exists,
- yolo_image_file_is_not_readable,
- yolo_image_file_is_corrupted,
+ yolo_names_file_is_not_readable, yolo_file_is_not_exists, yolo_file_is_not_readable, yolo_file_is_corrupted,
 
  yolo_video_cannot_alloc_base_structure,
  yolo_cannot_open_video_stream,
