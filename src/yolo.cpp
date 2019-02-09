@@ -1,5 +1,6 @@
-#include "include/yolo.h"
+#include "yolo.h"
 #include "private_structs.h"
+#include "darknet.h"
 
 #include <limits.h>
 #include <pthread.h>
@@ -8,31 +9,32 @@
 #include <unistd.h>
 #include <cmath>
 
-void fill_detect(yolo_object *yolo, detection *network_detection, int network_detection_index, detect *yolo_detect)
+void fill_object_detection(yolo_object *yolo, detection *network_detection, int network_detection_index, object_detection *yolo_detect)
 {
  size_t strlength=strlen(yolo->names[network_detection_index]);
  yolo->names[network_detection_index][strlength]='\0';
  yolo_detect->class_name=(char *)calloc(strlength+1, sizeof(char));
  strcpy(yolo_detect->class_name, yolo->names[network_detection_index]);
  yolo_detect->probability=network_detection->prob[network_detection_index]*100;
- yolo_detect->bbox=network_detection->bbox;
- box *bbox=&yolo_detect->bbox;
- bbox->x=bbox->x-(bbox->w/2);
- bbox->y=bbox->y-(bbox->h/2);
- if(bbox->x<0)
+ yolo_detect->box.x=network_detection->bbox.x-(network_detection->bbox.w/2);
+ yolo_detect->box.y=network_detection->bbox.y-(network_detection->bbox.y/2);
+ yolo_detect->box.width=network_detection->bbox.w;
+ yolo_detect->box.height=network_detection->bbox.h;
+
+ if(yolo_detect->box.x<0)
  {
-  bbox->x=0;
+  yolo_detect->box.x=0;
  }
- if(bbox->y<0)
+ if(yolo_detect->box.y<0)
  {
-  bbox->y=0;
+  yolo_detect->box.y=0;
  }
 }
 
-yolo_status fill_detection(yolo_object *yolo, detection *dets, yolo_detection_image *yolo_detect, float time_spent_for_classification, int nboxes, float thresh)
+yolo_status fill_image_detection(yolo_object *yolo, detection *dets, image_detection *yolo_detect, float time_spent_for_classification, int nboxes, float thresh)
 {
  yolo_detect->time_spent_for_classification=time_spent_for_classification;
- yolo_detect->num_boxes=0;
+ yolo_detect->num_detections=0;
  int class_index;
  detection *det;
 
@@ -53,56 +55,55 @@ yolo_status fill_detection(yolo_object *yolo, detection *dets, yolo_detection_im
   }
   if(class_index>-1 && det != nullptr)
   {
-   void *temp_pointer=realloc(yolo_detect->detection, sizeof(detect)*(yolo_detect->num_boxes+1));
+   void *temp_pointer=realloc(yolo_detect->object_detections, sizeof(object_detection)*(yolo_detect->num_detections+1));
    if(temp_pointer == nullptr)
    {
     return yolo_cannot_realloc_detect;
    }
-   yolo_detect->detection=(detect *)temp_pointer;
-   fill_detect(yolo, det, class_index, yolo_detect->detection+yolo_detect->num_boxes);
-   yolo_detect->num_boxes++;
+   yolo_detect->object_detections=(object_detection *)temp_pointer;
+   fill_object_detection(yolo, det, class_index, yolo_detect->object_detections+yolo_detect->num_detections);
+   yolo_detect->num_detections++;
   }
  }
 
  return yolo_ok;
 }
 
-yolo_status parse_detections_image(yolo_object *yolo, detection *dets, yolo_detection_image **yolo_detect, float time_spent_for_classification, int nboxes, float thresh)
+yolo_status parse_detections_image(yolo_object *yolo, detection *dets, image_detection **yolo_detect, float time_spent_for_classification, int nboxes, float thresh)
 {
  if((*yolo_detect) == nullptr)
  {
-  (*yolo_detect)=(yolo_detection_image *)calloc(1, sizeof(yolo_detection_image));
+  (*yolo_detect)=(image_detection *)calloc(1, sizeof(image_detection));
   if((*yolo_detect) == nullptr)
   {
    return yolo_cannot_alloc_yolo_detection;
   }
  }
-
- return fill_detection(yolo, dets, (*yolo_detect), time_spent_for_classification, nboxes, thresh);
+ return fill_image_detection(yolo, dets, (*yolo_detect), time_spent_for_classification, nboxes, thresh);
 }
 
-yolo_status parse_detections_video(yolo_object *yolo, detection *dets, yolo_detection_video **yolo_detect, float time_spent_for_classification, long frame_id, double milisecond, int nboxes, float thresh)
+yolo_status parse_detections_video(yolo_object *yolo, detection *dets, video_detection **yolo_detect, float time_spent_for_classification, long frame_id, double millisecond, int nboxes, float thresh)
 {
  if((*yolo_detect) == nullptr)
  {
-  (*yolo_detect)=(yolo_detection_video *)calloc(1, sizeof(yolo_detection_video*));
+  (*yolo_detect)=(video_detection *)calloc(1, sizeof(video_detection *));
   if((*yolo_detect) == nullptr)
   {
    return yolo_cannot_alloc_yolo_detection;
   }
  }
- yolo_detection_video *video_detection=*yolo_detect;
- auto *temp=(yolo_detection_frame *)realloc(video_detection->frame_detections, sizeof(yolo_detection_frame)*(video_detection->count+1));
+ video_detection *video_detection=*yolo_detect;
+ auto *temp=(frame_detection *)realloc(video_detection->frame_detections, sizeof(frame_detection)*(video_detection->num_frames+1));
  if(temp == nullptr)
  {
   return yolo_cannot_alloc_yolo_detection;
  }
- memset(temp+video_detection->count, 0, sizeof(yolo_detection_frame));
+ memset(temp+video_detection->num_frames, 0, sizeof(frame_detection));
  video_detection->frame_detections=temp;
- video_detection->frame_detections[video_detection->count].frame=frame_id;
- video_detection->frame_detections[video_detection->count].milisecond=milisecond;
- yolo_status yolo_stats=fill_detection(yolo, dets, &video_detection->frame_detections[video_detection->count].detection_frame, time_spent_for_classification, nboxes, thresh);
- ++video_detection->count;
+ video_detection->frame_detections[video_detection->num_frames].frame=frame_id;
+ video_detection->frame_detections[video_detection->num_frames].millisecond=millisecond;
+ yolo_status yolo_stats=fill_image_detection(yolo, dets, &video_detection->frame_detections[video_detection->num_frames].image_detection, time_spent_for_classification, nboxes, thresh);
+ ++video_detection->num_frames;
  return yolo_stats;
 }
 
@@ -137,7 +138,7 @@ image libyolo_mat_to_image(cv::Mat &m)
  return im;
 }
 
-unsigned long long unixTimeMilis()
+unsigned long long unixTimeMillis()
 {
  struct timeval tv{};
 
@@ -271,7 +272,7 @@ void *thread_detect(void *data)
 
   image sized=resize_image(queue_image.frame, th_data->yolo->net->w, th_data->yolo->net->h);
   float *X=sized.data;
-  time=unixTimeMilis();
+  time=unixTimeMillis();
   network_predict(th_data->yolo->net, X);
 
   int nboxes=0;
@@ -281,7 +282,7 @@ void *thread_detect(void *data)
    do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
   }
 
-  parse_detections_video(th_data->yolo, dets, th_data->yolo_detect, (unixTimeMilis()-time), queue_image.frame_number, queue_image.milisecond, nboxes, th_data->thresh);
+  parse_detections_video(th_data->yolo, dets, th_data->yolo_detect, (unixTimeMillis()-time), queue_image.frame_number, queue_image.milisecond, nboxes, th_data->thresh);
   free_detections(dets, nboxes);
 
   free_image(queue_image.frame);
@@ -300,54 +301,58 @@ yolo_status yolo_check_before_process_filename(yolo_object *yolo, char *filename
  if(access(filename, F_OK) == -1)
  {
   fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
-  return yolo_image_file_is_not_exists;
+  return yolo_file_is_not_exists;
  }
 
  if(access(filename, R_OK) == -1)
  {
   fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
-  return yolo_image_file_is_not_readable;
+  return yolo_file_is_not_readable;
  }
  return yolo_ok;
 }
 
-void yolo_cleanup(yolo_object *yolo)
+void yolo_free(void *yolo)
 {
  if(yolo == nullptr)
  {
   return;
  }
-
- if(yolo->net != nullptr)
+ yolo_object *yolo_instance=static_cast<yolo_object *>(yolo);
+ if(yolo_instance->net != nullptr)
  {
-  free_network(yolo->net);
+  free_network(yolo_instance->net);
  }
 
- if(yolo->names != nullptr)
+ if(yolo_instance->names != nullptr)
  {
-  for(int i=0; i<yolo->class_number; i++)
+  for(int i=0; i<yolo_instance->class_number; i++)
   {
-   if(yolo->names[i] != nullptr)
+   if(yolo_instance->names[i] != nullptr)
    {
-    free(yolo->names[i]);
+    free(yolo_instance->names[i]);
    }
   }
-  free(yolo->names);
+  free(yolo_instance->names);
  }
- free(yolo);
- yolo_object **ptr_yolo=&yolo;
+ free(yolo_instance);
+ yolo_object **ptr_yolo=&yolo_instance;
  (*ptr_yolo)=nullptr;
 }
 
-yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, char *cfgfile, char *weightfile)
+yolo_status yolo_init(void **yolo_obj, char *workingDir, char *datacfg, char *cfgfile, char *weightfile)
 {
  clock_t time=clock();
-
- yolo_cleanup((*yolo_obj));
+ if(yolo_obj == nullptr)
+ {
+  return yolo_object_is_not_initialized;
+ }
+ yolo_object **yolo_instance=(yolo_object **)yolo_obj;
+ yolo_free((*yolo_instance));
 
  (*yolo_obj)=(yolo_object *)malloc(sizeof(yolo_object));
 
- yolo_object *yolo=(*yolo_obj);
+ yolo_object *yolo=(*yolo_instance);
  if(!yolo)
  {
   return yolo_cannot_alloc_node_yolo_object;
@@ -408,7 +413,7 @@ yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, c
  }
 
  list *options=read_data_cfg(datacfg);
- char *name_list=option_find_str(options, "names", "data/names.list");
+ char *name_list=option_find_str(options, (char *)"names", (char *)"data/names.list");
 
  if(access(name_list, F_OK) == -1)
  {
@@ -421,7 +426,7 @@ yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, c
   return yolo_names_file_is_not_readable;
  }
  yolo->names=get_labels(name_list);
- char *classes=option_find_str(options, "classes", "data/names.list");
+ char *classes=option_find_str(options, (char *)"classes", (char *)"data/names.list");
  char *bad_ptr=nullptr;
  long value=strtol(classes, &bad_ptr, 10);
  if(value<INT_MAX)
@@ -437,9 +442,14 @@ yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, c
  return yolo_ok;
 }
 
-yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, char *filename, float thresh)
+yolo_status yolo_detect_image(void *yolo, image_detection **detect, char *filename, float thresh)
 {
- yolo_status status=yolo_check_before_process_filename(yolo, filename);
+ if(yolo == nullptr)
+ {
+  return yolo_object_is_not_initialized;
+ }
+ yolo_object *yolo_instance=static_cast<yolo_object *>(yolo);
+ yolo_status status=yolo_check_before_process_filename(yolo_instance, filename);
  if(status != yolo_ok)
  {
   return status;
@@ -449,29 +459,29 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, 
  if(mat.empty())
  {
   fprintf(stderr, "error yolo_detect: %s\n", strerror(errno));
-  return yolo_image_file_is_corrupted;
+  return yolo_file_is_corrupted;
  }
 
- layer l=yolo->net->layers[yolo->net->n-1];
+ layer l=yolo_instance->net->layers[yolo_instance->net->n-1];
  unsigned long long time;
  float nms=0.45;
 
  image im=libyolo_mat_to_image(mat);
  mat.release();
 
- image sized=resize_image(im, yolo->net->w, yolo->net->h);
+ image sized=resize_image(im, yolo_instance->net->w, yolo_instance->net->h);
  float *X=sized.data;
- time=unixTimeMilis();
- network_predict(yolo->net, X);
+ time=unixTimeMillis();
+ network_predict(yolo_instance->net, X);
 
  int nboxes=0;
- detection *dets=get_network_boxes(yolo->net, im.w, im.h, thresh, 0.5, nullptr, 0, &nboxes);
+ detection *dets=get_network_boxes(yolo_instance->net, im.w, im.h, thresh, 0.5, nullptr, 0, &nboxes);
  if(nms>0)
  {
   do_nms_sort(dets, l.side*l.side*l.n, l.classes, nms);
  }
 
- status=parse_detections_image(yolo, dets, detect, unixTimeMilis()-time, nboxes, thresh);
+ status=parse_detections_image(yolo_instance, dets, detect, unixTimeMillis()-time, nboxes, thresh);
  if(status != yolo_ok)
  {
   return status;
@@ -484,9 +494,14 @@ yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, 
  return yolo_ok;
 }
 
-yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh, double fraction_frames_to_process)
+yolo_status yolo_detect_video(void *yolo, video_detection **detect, char *filename, float thresh, double fraction_frames_to_process)
 {
- yolo_status status=yolo_check_before_process_filename(yolo, filename);
+ if(yolo == nullptr)
+ {
+  return yolo_object_is_not_initialized;
+ }
+ yolo_object *yolo_instance=static_cast<yolo_object *>(yolo);
+ yolo_status status=yolo_check_before_process_filename(yolo_instance, filename);
  if(status != yolo_ok)
  {
   return status;
@@ -507,7 +522,7 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
 
  data_get_image.image_queue=data_process_image.image_queue=&image_queue;
 
- data_process_image.yolo=yolo;
+ data_process_image.yolo=yolo_instance;
  data_process_image.thresh=thresh;
  data_process_image.yolo_detect=detect;
 
@@ -572,38 +587,38 @@ yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, 
  return yolo_ok;
 }
 
-void yolo_detect_free(yolo_detection_image *yolo_det)
+void yolo_detect_free(image_detection *yolo_det)
 {
- for(size_t i=0; i<yolo_det->num_boxes; i++)
+ for(size_t i=0; i<yolo_det->num_detections; i++)
  {
-  free(yolo_det->detection[i].class_name);
+  free(yolo_det->object_detections[i].class_name);
  }
- free(yolo_det->detection);
+ free(yolo_det->object_detections);
 }
 
-void yolo_detection_image_free(yolo_detection_image **yolo)
+void image_detection_free(image_detection **p_image_detection)
 {
- if((*yolo) == nullptr)
+ if((*p_image_detection) == nullptr)
  {
   return;
  }
- yolo_detect_free(*yolo);
- free(*yolo);
- (*yolo)=nullptr;
+ yolo_detect_free(*p_image_detection);
+ free(*p_image_detection);
+ (*p_image_detection)=nullptr;
 }
 
-void yolo_detection_video_free(yolo_detection_video **yolo)
+void video_detection_free(video_detection **p_video_detection)
 {
- yolo_detection_video *yolo_det=*yolo;
- if(yolo_det == nullptr)
+ video_detection *video_detection=*p_video_detection;
+ if(video_detection == nullptr)
  {
   return;
  }
- for(size_t i=0; i<yolo_det->count; ++i)
+ for(size_t i=0; i<video_detection->num_frames; ++i)
  {
-  yolo_detect_free(&yolo_det->frame_detections[i].detection_frame);
+  yolo_detect_free(&video_detection->frame_detections[i].image_detection);
  }
- free(yolo_det->frame_detections);
- free(yolo_det);
- (*yolo)=nullptr;
+ free(video_detection->frame_detections);
+ free(video_detection);
+ (*p_video_detection)=nullptr;
 }

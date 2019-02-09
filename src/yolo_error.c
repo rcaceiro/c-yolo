@@ -10,7 +10,7 @@ yolo_status_detailed yolo_status_decode(yolo_status status)
    status_detailed.error_message="Cannot instantiate due an error.";
    break;
   case yolo_cannot_realloc_detect:
-   status_detailed.error_message="Cannot allocate detect in memory";
+   status_detailed.error_message="Cannot allocate object_detection in memory";
    break;
   case yolo_cannot_alloc_yolo_detection:
    status_detailed.error_message="Cannot allocate yolo_detection in memory";
@@ -57,27 +57,15 @@ yolo_status_detailed yolo_status_decode(yolo_status status)
   case yolo_names_file_is_not_readable:
    status_detailed.error_message="names file isn't readable";
    break;
-  case yolo_image_file_is_not_exists:
-   status_detailed.error_message="image file isn't exists";
+  case yolo_file_is_not_exists:
+   status_detailed.error_message="file isn't exists";
    break;
-  case yolo_image_file_is_not_readable:
-   status_detailed.error_message="image file isn't readable";
+  case yolo_file_is_not_readable:
+   status_detailed.error_message="file isn't readable";
    break;
-  case yolo_image_file_is_corrupted:
-   status_detailed.error_message="image file is corrupted";
+  case yolo_file_is_corrupted:
+   status_detailed.error_message="file is corrupted";
    break;
-   //  case yolo_napi_create_object_time_spent_for_classification_double_failed:
-   //   status_detailed.error_message="image file is corrupted";
-   //   break;
-   //  case yolo_napi_create_object_time_spent_for_classification_named_property_failed:
-   //   status_detailed.error_message="image file is corrupted";
-   //   break;
-   //  case yolo_napi_set_array_property_failed:
-   //   status_detailed.error_message="image file is corrupted";
-   //   break;
-   //  case yolo_napi_create_main_object_failed:
-   //   status_detailed.error_message="image file is corrupted";
-   //   break;
   default:
    status_detailed.error_message="Unknow error";
  }
