@@ -1,12 +1,19 @@
 #ifndef NODE_YOLO_PRIVATE_STRUCTS_H
 #define NODE_YOLO_PRIVATE_STRUCTS_H
 
-#include "include/yolo.h"
-
+#include "yolo.h"
 #include <semaphore.h>
-
+#include "darknet.h"
 #include <deque>
 #include <opencv2/opencv.hpp>
+
+typedef struct
+{
+ int class_number;
+ char **names;
+ float nms;
+ network *net;
+}yolo_object;
 
 typedef struct
 {
@@ -46,7 +53,7 @@ typedef struct
 
  yolo_object *yolo;
  float thresh;
- yolo_detection_video **yolo_detect;
+ video_detection **yolo_detect;
 }thread_processing_image_t;
 
 #endif //NODE_YOLO_PRIVATE_STRUCTS_H
