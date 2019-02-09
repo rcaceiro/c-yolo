@@ -1,62 +1,62 @@
-#ifndef LIBYOLO_H
-#define LIBYOLO_H
+#ifndef YOLO_H
+#define YOLO_H
 
-#include "darknet.h"
+#include <stddef.h>
 #include "yolo_error.h"
 
+#define __cplusplus 2018703L
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef struct
 {
+ float x;
+ float y;
+ float width;
+ float height;
+}detection_box;
+
+typedef struct
+{
  char *class_name;
  float probability;
- box bbox;
-}detect;
+ detection_box box;
+}object_detection;
 
 typedef struct
 {
- detect *detection;
- size_t num_boxes;
+ object_detection *object_detections;
+ size_t num_detections;
  float time_spent_for_classification;
-}yolo_detection_image;
+}image_detection;
 
 typedef struct
 {
- yolo_detection_image detection_frame;
- double milisecond;
+ image_detection image_detection;
+ double millisecond;
  long frame;
-}yolo_detection_frame;
+}frame_detection;
 
 typedef struct
 {
- yolo_detection_frame *frame_detections;
- size_t count;
-}yolo_detection_video;
+ frame_detection *frame_detections;
+ size_t num_frames;
+}video_detection;
 
-typedef struct
-{
- int class_number;
- char **names;
- float nms;
- network *net;
-}yolo_object;
-
-yolo_status yolo_init(yolo_object **yolo_obj, char *workingDir, char *datacfg, char *cfgfile, char *weightfile);
-
-yolo_status yolo_detect_image(yolo_object *yolo, yolo_detection_image **detect, char *filename, float thresh);
-
-yolo_status yolo_detect_video(yolo_object *yolo, yolo_detection_video **detect, char *filename, float thresh, double fraction_frames_to_process);
-
-void yolo_detection_image_free(yolo_detection_image **yolo);
-
-void yolo_detection_video_free(yolo_detection_video **yolo);
-
-void yolo_cleanup(yolo_object *yolo);
+yolo_status yolo_init(void **yolo_obj, char *workingDir, char *datacfg, char *cfgfile, char *weightfile);
+yolo_status yolo_detect_image(void *yolo, image_detection **detect, char *filename, float thresh);
+yolo_status yolo_detect_video(void *yolo, video_detection **detect, char *filename, float thresh, double fraction_frames_to_process);
+void image_detection_free(image_detection**p_image_detection);
+void video_detection_free(video_detection **p_video_detection);
+void yolo_free(void *yolo);
 
 #ifdef __cplusplus
 };
-#endif
 
-#endif // LIBYOLO_H
+class Yolo
+{
+
+};
+#endif
+#endif // YOLO_H
