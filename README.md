@@ -12,7 +12,7 @@
 	* [CUDA](https://developer.nvidia.com/cuda-zone)
 	* [CuDNN](https://developer.nvidia.com/cudnn)
 * [CMake](https://cmake.org) (>=3.13)
-* [OpenCV](https://opencv.org)
+* [OpenCV](https://opencv.org) (<4.0.0)
 
 **Note 1**: Before any update please see the [changelog](https://github.com/rcaceiro/node-yolo/blob/master/CHANGELOG.md).<br>
 ### Recommended* hardware requirements
