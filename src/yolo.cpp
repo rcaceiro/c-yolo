@@ -2,12 +2,10 @@
 #include "private_structs.h"
 #include "darknet.h"
 
-#include <limits.h>
 #include <pthread.h>
 #include <fcntl.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <cmath>
 
 void fill_object_detection(yolo_object *yolo, detection *network_detection, int network_detection_index, object_detection *yolo_detect)
 {
@@ -622,3 +620,44 @@ void video_detection_free(video_detection **p_video_detection)
  free(video_detection);
  (*p_video_detection)=nullptr;
 }
+
+#ifdef __cplusplus
+
+#include <stdexcept>
+
+Yolo::Yolo(std::string workingDir, std::string datacfg, std::string cfgfile, std::string weightfile)
+{
+ this->yolo=nullptr;
+ yolo_status status=yolo_init(&this->yolo, (char *)workingDir.c_str(), (char *)datacfg.c_str(), (char *)cfgfile.c_str(), (char *)weightfile.c_str());
+ if(status != yolo_ok)
+ {
+  //TODO Complete this with some custom error
+  throw std::invalid_argument("...");
+ }
+}
+
+Yolo::~Yolo()
+{
+ yolo_free(this->yolo);
+ this->yolo=nullptr;
+}
+
+image_detection *Yolo::detectImage(std::string filename, float thresh)
+{
+
+}
+
+yolo_status Yolo::detectVideo(video_detection **detect, std::string filename, float thresh, double fraction_frames_to_process)
+{
+
+}
+
+void Yolo::image_detection_free(image_detection **p_image_detection)
+{
+}
+
+void Yolo::video_detection_free(video_detection **p_video_detection)
+{
+}
+
+#endif

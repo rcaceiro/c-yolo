@@ -69,5 +69,5 @@ TARGET_LINK_DIRECTORIES(yolo PRIVATE ./src ./darknet/include)
 TARGET_LINK_LIBRARIES(yolo PRIVATE opencv_core opencv_highgui opencv_videoio opencv_video ${CUDA_LIBS})
 SET_TARGET_PROPERTIES(yolo PROPERTIES VERSION 1.0.0)
 
-ADD_EXECUTABLE(yolo_test src/main.c)
+ADD_EXECUTABLE( yolo_test src/main.cpp )
 TARGET_LINK_LIBRARIES(yolo_test yolo)
