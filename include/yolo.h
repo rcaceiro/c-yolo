@@ -4,8 +4,9 @@
 #include <stddef.h>
 #include "yolo_error.h"
 
-#define __cplusplus 2018703L
 #ifdef __cplusplus
+
+#include <string>
 extern "C" {
 #endif
 
@@ -56,7 +57,21 @@ void yolo_free(void *yolo);
 
 class Yolo
 {
+public:
+ Yolo(std::string workingDir, std::string datacfg, std::string cfgfile, std::string weightfile);
 
+ ~Yolo();
+
+ image_detection *detectImage(std::string filename, float thresh);
+
+ yolo_status detectVideo(video_detection **detect, std::string filename, float thresh, double fraction_frames_to_process);
+
+ void image_detection_free(image_detection **p_image_detection);
+
+ void video_detection_free(video_detection **p_video_detection);
+
+private:
+ void *yolo;
 };
 #endif
 #endif // YOLO_H
